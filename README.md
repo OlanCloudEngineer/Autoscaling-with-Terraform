@@ -3,7 +3,7 @@
 
 ## Update 📢
 ```
-📺 Code has been updated to the latest syntax (July 3, 2020)
+📺 Code has been updated to the latest syntax (June 1, 2021)
 ```
 
 ---
