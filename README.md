@@ -1,23 +1,15 @@
-# Creating a Load Balancing between a cluster of web servers on AWS with Terraform
-
-
-## Update 📢
-```
-📺 Code has been updated to the latest syntax (June 1, 2021)
-```
+# This Project creates a Load Balanced Server Environment on AWS with Terraform
 
 ---
 
 
-This is a Sample code to create a bunch of `webservers` behind a Load Balancer (`ELB`) with an Auto scaling group (`ASG`)
+This is a Sample code to create a 2(3-Max) `webservers` behind a Load Balancer (`ELB`) with an Auto scaling group (`ASG`)
 
 
 
 ### Deploy a Cluster of Web Servers
 
-We will use `ASG` to launch a `cluster` of `EC2` Instances,  monitoring the health of each Instance, replacing failed Instances, and adjusting the size of the cluster in response to load.
-
-* `ASG` distributes the `EC2` instances across multiple `availability zones` 
+We will use `ASG` to launch a `cluster` of `EC2` Instances,  monitoring the health of each Instance, replacing failed Instances, and adjusting the size of the cluster in response to load. 
 
 
 
@@ -37,7 +29,7 @@ For other platforms to install Terraform download the binary from the download p
 
 https://www.terraform.io/downloads.html
 
-```bash
+bash
 yum -y install unzip
 
 cd /tmp
@@ -45,9 +37,6 @@ wget https://releases.hashicorp.com/terraform/0.12.28/terraform_0.12.28_linux_am
 unzip terraform_0.12.28_linux_amd64.zip -d /usr/bin/
 
 terraform -v
-```
-
-
 
 ---
 
@@ -70,8 +59,8 @@ yum -y install git
 
 
 ```bash
-git clone https://github.com/Eslam-Naser/terraform-AWS-ASG-ELB.git
-cd terraform-AWS-ASG-ELB/
+git clone https://github.com/OlanCloudEngineer/Autoscaling-with-Terraform.git
+cd Autoscaling-with-Terraform/
 
 # Downloading the Plugin for the AWS provider
 terraform init
@@ -100,6 +89,3 @@ terraform apply
 terraform destroy
 # yes | if you want to proceed
 ```
-
-
-

@@ -2,13 +2,19 @@
 // export AWS_ACCESS_KEY_ID=<your access key>
 // export AWS_SECRET_ACCESS_KEY=<your secret key>
 
-provider "aws" {
-  region = var.region
+resource "aws_instance" "TerraP" {
+  instance_type = "t2.micro"      
+  ami = "<machine-ami>"   
+  key_name = "TerraformProject"   
+
+tags = {
+  Name = "olanhotservers"
 }
 
+}
 resource "aws_security_group" "alb-sec-group" {
   name = "alb-sec-group"
-  description = "Security Group for the ELB (ALB)"
+  description = "Security Group for the ELB (ALB)"      
   egress {
     from_port = 0
     protocol = "-1"
@@ -16,19 +22,27 @@ resource "aws_security_group" "alb-sec-group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+    description = "SSH"
     from_port = 22
     protocol = "tcp"
     to_port = 22
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+    description = "HTTP"
+    from_port = 80
+    protocol = "tcp"
+    to_port = 80
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "HTTPS"
     from_port = 443
     protocol = "tcp"
     to_port = 443
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 resource "aws_security_group" "asg_sec_group" {
   name = "asg_sec_group"
   description = "Security Group for the ASG"
@@ -42,20 +56,21 @@ resource "aws_security_group" "asg_sec_group" {
     to_port = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
-  // Allow Inbound traffic from the ELB Security-Group
+  // Allow Inbound traffic from the ELB Security-Group  
   ingress {
     from_port = 80
     protocol = "tcp"
     to_port = 80
-    security_groups = [aws_security_group.alb-sec-group.id] // Allow Inbound traffic from the ALB Sec-Group
+    security_groups = [aws_security_group.alb-sec-group.id] // Allow Inbound traffic from the ALB Sec-Group     
   }
 }
 
 // Create the Launch configuration so that the ASG can use it to launch EC2 instances
 // https://www.terraform.io/docs/providers/aws/r/launch_configuration.html
-resource "aws_launch_configuration" "ec2_template" {
+resource "aws_launch_configuration" "ec2_template" {    
+  name-prefix = "olancloudengineer-templ"
   image_id = var.image_id
-  instance_type = var.flavor
+  instance_type = var.mactype
   user_data = <<-EOF
             #!/bin/bash
             yum -y update
@@ -69,7 +84,7 @@ resource "aws_launch_configuration" "ec2_template" {
   // --> Create New resources before destroying the old resources
   lifecycle {
     create_before_destroy = true
-  }
+ }
 }
 
 data "aws_vpc" "default" {
@@ -78,27 +93,24 @@ data "aws_vpc" "default" {
 
 data "aws_subnet_ids" "default" {
   vpc_id = data.aws_vpc.default.id
-}
-
-
+ }
 
 // Create the ASG
 // https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html
 
-resource "aws_autoscaling_group" "Practice_ASG" {
-  max_size = 5
+resource "aws_autoscaling_group" "Practice_ASG" {       
+  max_size = 3
   min_size = 2
   launch_configuration = aws_launch_configuration.ec2_template.name
   health_check_grace_period = 300 // Time after instance comes into service before checking health.
 
-  health_check_type = "ELB" // ELB or Ec2 (Default):
-  // EC2 --> Minimal health check - consider the vm unhealthy if the Hypervisor says the vm is completely down
+  health_check_type = "ELB" // ELB or Ec2 (Default):    
   // ELB --> Instructs the ASG to use the "target's group" health check
 
-  vpc_zone_identifier = data.aws_subnet_ids.default.ids // A list of subnet IDs to launch resources in.
-  // We specified all the subnets in the default vpc
+  vpc_zone_identifier = data.aws_subnet_ids.default.ids 
+// A list of subnet IDs to launch resources in.  
 
-  target_group_arns = [aws_lb_target_group.asg.arn]
+  target_group_arns = [aws_lb_target_group.asg.arn]     
 
   tag {
     key = "name"
@@ -110,8 +122,7 @@ resource "aws_autoscaling_group" "Practice_ASG" {
   }
 }
 
-// https://www.terraform.io/docs/providers/aws/r/lb.html
-resource "aws_lb" "ELB" {
+// https://www.terraform.io/docs/providers/aws/r/lb.htmlresource "aws_lb" "ELB" {
   name               = "terraform-asg-example"
   load_balancer_type = "application"
 
@@ -122,7 +133,8 @@ resource "aws_lb" "ELB" {
 
 // https://www.terraform.io/docs/providers/aws/r/lb_listener.html
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.ELB.arn // Amazon Resource Name (ARN) of the load balancer
+  load_balancer_arn = aws_lb.ELB.arn // Amazon Resource 
+Name (ARN) of the load balancer
   port = 80
   protocol = "HTTP"
 
@@ -163,7 +175,7 @@ resource "aws_lb_listener_rule" "asg" {
 
   action {
     type = "forward"
-    target_group_arn = aws_lb_target_group.asg.arn
+    target_group_arn = aws_lb_target_group.asg.arn      
   }
   condition {
     path_pattern {
@@ -171,7 +183,3 @@ resource "aws_lb_listener_rule" "asg" {
     }
   }
 }
-
-
-
-
