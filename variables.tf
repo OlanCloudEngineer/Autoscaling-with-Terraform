@@ -9,7 +9,7 @@ variable "image_id" {
   default = "ami-922914f7"
 }
 
-variable "flavor" {
+variable "mactype" {
   type = string
   default = "t2.micro"
 }
