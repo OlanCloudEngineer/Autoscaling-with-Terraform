@@ -33,7 +33,9 @@ bash
 yum -y install unzip
 
 cd /tmp
-wget https://releases.hashicorp.com/terraform/0.15.4/terraform_0.15.4_linux_amd64.zip
+
+wget https://releases.hashicorp.com/terraform/0.15.4/terraform_0.15.4_linux_amd64.
+
 unzip terraform_0.15.4_linux_amd64.zip -d /usr/bin/
 
 terraform -v
